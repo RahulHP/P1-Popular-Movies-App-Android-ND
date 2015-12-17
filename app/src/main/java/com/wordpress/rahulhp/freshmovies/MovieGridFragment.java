@@ -7,6 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +46,10 @@ public class MovieGridFragment extends Fragment {
 
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview_movies);
         gridView.setAdapter(mGridAdapter);
+        ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView);
+        Picasso.with(getActivity())
+                .load("https://cms-assets.tutsplus.com/uploads/users/21/posts/19431/featured_image/CodeFeature.jpg")
+                .into(imageView);
         return rootView;
     }
 }

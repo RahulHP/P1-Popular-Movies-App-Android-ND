@@ -9,11 +9,24 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".MainActivity$MovieGridFragment">
 
-    <GridView
-        android:id="@+id/gridview_movies"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal|top"
-        android:numColumns="3" />
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView" />
+
+        <GridView
+            android:id="@+id/gridview_movies"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal|top"
+            android:numColumns="3" />
+
+    </LinearLayout>
+
 
 </FrameLayout>
