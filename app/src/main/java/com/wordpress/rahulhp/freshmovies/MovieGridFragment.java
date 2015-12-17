@@ -1,7 +1,7 @@
 package com.wordpress.rahulhp.freshmovies;
 
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +45,8 @@ public class MovieGridFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview_movies);
-        gridView.setAdapter(mGridAdapter);
+        gridView.setAdapter(new MovieAdapter(getActivity()));
+
         ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView);
         Picasso.with(getActivity())
                 .load("https://cms-assets.tutsplus.com/uploads/users/21/posts/19431/featured_image/CodeFeature.jpg")
