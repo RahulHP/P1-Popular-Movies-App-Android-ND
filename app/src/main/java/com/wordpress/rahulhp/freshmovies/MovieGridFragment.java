@@ -11,6 +11,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,13 +41,18 @@ public class MovieGridFragment extends Fragment {
     }
 
     private void updateMovies(){
+
         FetchMovieTask movieTask = new FetchMovieTask();
+
         movieTask.execute();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        mMovieAdapter = new ArrayList<MovieItem>();
+
+
         String[] movies ={
                 "Hello",
                 "Test",
@@ -75,16 +84,44 @@ public class MovieGridFragment extends Fragment {
     public class FetchMovieTask extends AsyncTask<Void, Void, MovieItem[]>{
         private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
 
-        private MovieItem[] getMovieListFromJson(String resultJsonstr){
+        private MovieItem[] getMovieListFromJson(String resultJsonstr)
+            throws JSONException{
 
-            return  null;
+            final String TMDB_RESULTS="results";
+
+            final String TMDB_POSTER_PATH = "poster_path";
+            final String TMDB_ID = "id";
+            final String TMDB_TITLE = "title";
+            final String TMDB_OVERVIEW = "overview";
+            final String TMDB_RELEASE_DATE = "release_date";
+            final String TMDB_POPULARITY = "popularity";
+
+
+
+            JSONObject initialJson = new JSONObject(resultJsonstr);
+            JSONArray resultsArray = initialJson.getJSONArray(TMDB_RESULTS);
+
+            MovieItem[] results = new MovieItem[resultsArray.length()];
+
+            for (int i=0 ; i< results.length;i++){
+                JSONObject movieJson = resultsArray.getJSONObject(i);
+
+                String poster_path = movieJson.getString(TMDB_POSTER_PATH);
+                Long id = movieJson.getLong(TMDB_ID);
+                String original_title = movieJson.getString(TMDB_TITLE);
+                String overview = movieJson.getString(TMDB_OVERVIEW);
+                String release_date = movieJson.getString(TMDB_RELEASE_DATE);
+                Double popularity = movieJson.getDouble(TMDB_POPULARITY);
+
+                results[i] = new MovieItem(id,original_title,overview,release_date,poster_path, popularity);
+                Log.d(LOG_TAG,results[i].toString());
+            }
+            return results;
         }
 
         @Override
         protected MovieItem[] doInBackground(Void... params) {
-            if (params.length == 0) {
-                return null;
-            }
+
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -92,7 +129,7 @@ public class MovieGridFragment extends Fragment {
             String resultJsonstr = null;
 
             String sort_by_type="popularity.desc";
-            String api_key="xyz";
+            String api_key=BuildConfig.TMDB_API_KEY;
             try {
                 final String BASE_URL="http://api.themoviedb.org/3/discover/movie";
                 final String SORT_BY="sort_by";
@@ -104,7 +141,7 @@ public class MovieGridFragment extends Fragment {
                         .build();
 
                 URL url = new URL(builtUri.toString());
-
+                Log.v(LOG_TAG,url.toString());
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -117,6 +154,7 @@ public class MovieGridFragment extends Fragment {
                     // Nothing to do.
                     return null;
                 }
+
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String line;
@@ -133,6 +171,7 @@ public class MovieGridFragment extends Fragment {
                 }
 
                 resultJsonstr = buffer.toString();
+
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
@@ -150,16 +189,16 @@ public class MovieGridFragment extends Fragment {
                     }
                 }
             }
-
-            //try {
+            Log.d(LOG_TAG,resultJsonstr);
+            try {
                 return getMovieListFromJson(resultJsonstr);
-            //} catch (JSONException e) {
-            //    Log.e(LOG_TAG, e.getMessage(), e);
-            //    e.printStackTrace();
-            //}
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
 
             // This will only happen if there was an error getting or parsing the forecast.
-            //return null;
+            return null;
 
         }
 
