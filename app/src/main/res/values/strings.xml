@@ -1,4 +1,16 @@
 <resources>
     <string name="app_name">FreshMovies</string>
     <string name="action_settings">Settings</string>
+
+    <string name="pref_sort_order_label">Sort Order</string>
+    <string name="pref_sort_order_key" translatable="false">sort_order</string>
+
+    <string name="pref_sort_order_popularity_label">Most Popular</string>
+    <string name="pref_sort_order_popularity_key" translatable="false">popularity.desc</string>
+
+    <string name="pref_sort_order_highest_rated_label">Highest Rated</string>
+    <string name="pref_sort_order_highest_rated_key" translatable="false">vote_average.desc</string>
+    <string name="title_activity_settings2">Settings</string>
+
+
 </resources>
