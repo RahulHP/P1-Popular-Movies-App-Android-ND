@@ -1,11 +1,16 @@
 package com.wordpress.rahulhp.freshmovies;
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
@@ -32,9 +37,25 @@ public class MovieGridFragment extends Fragment {
     public MovieGridFragment(){}
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Add this line in order for this fragment to handle menu events.
+        setHasOptionsMenu(true);
+    }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.moviegridfragment,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_refresh) {
+            updateMovies();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void updateMovies(){
@@ -98,13 +119,19 @@ public class MovieGridFragment extends Fragment {
         @Override
         protected MovieItem[] doInBackground(Void... params) {
 
+            SharedPreferences sharedPrefs =
+                    PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
             String resultJsonstr = null;
 
-            String sort_by_type="popularity.desc";
+            String sort_by_type=sharedPrefs.getString(
+                    getString(R.string.pref_sort_order_key),
+                    getString(R.string.pref_sort_order_popularity_key));
 
             try {
                 final String BASE_URL="http://api.themoviedb.org/3/discover/movie";
