@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
 
 import org.json.JSONArray;
@@ -22,22 +21,20 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class MovieGridFragment extends Fragment {
-
-    private ArrayList<MovieItem> mMovieAdapter;
-    private ArrayAdapter<String> mGridAdapter;
+    private String LOG_TAG = MovieGridFragment.class.getSimpleName();
+    private ArrayList<MovieItem> mMovieList;
+    private MovieAdapter adapter;
     public MovieGridFragment(){}
 
     @Override
     public void onStart() {
         super.onStart();
-        updateMovies();
+
     }
 
     private void updateMovies(){
@@ -50,33 +47,12 @@ public class MovieGridFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mMovieAdapter = new ArrayList<MovieItem>();
-
-
-        String[] movies ={
-                "Hello",
-                "Test",
-                "Movie",
-                "Another",
-                "Clean",
-                "Mobile",
-        };
-        List<String> movieGrid = new ArrayList<String>(Arrays.asList(movies));
-
-        mGridAdapter= new ArrayAdapter<String>(
-                getActivity(),
-                R.layout.list_item_movie,
-                R.id.list_item_movie_textview,
-                movieGrid);
+        mMovieList = new ArrayList<MovieItem>();
+        updateMovies();
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview_movies);
-        gridView.setAdapter(new MovieAdapter(getActivity()));
-
-        //ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView);
-        //Picasso.with(getActivity())
-        //        .load("https://cms-assets.tutsplus.com/uploads/users/21/posts/19431/featured_image/CodeFeature.jpg")
-        //        .into(imageView);
+        adapter = new MovieAdapter(getActivity(),mMovieList);
+        gridView.setAdapter(adapter);
         return rootView;
     }
 
@@ -114,7 +90,7 @@ public class MovieGridFragment extends Fragment {
                 Double popularity = movieJson.getDouble(TMDB_POPULARITY);
 
                 results[i] = new MovieItem(id,original_title,overview,release_date,poster_path, popularity);
-                Log.d(LOG_TAG,results[i].toString());
+
             }
             return results;
         }
@@ -129,14 +105,14 @@ public class MovieGridFragment extends Fragment {
             String resultJsonstr = null;
 
             String sort_by_type="popularity.desc";
-            String api_key=BuildConfig.TMDB_API_KEY;
+
             try {
                 final String BASE_URL="http://api.themoviedb.org/3/discover/movie";
                 final String SORT_BY="sort_by";
                 final String API_KEY = "api_key";
 
                 Uri builtUri = Uri.parse(BASE_URL).buildUpon()
-                        .appendQueryParameter(API_KEY,api_key)
+                        .appendQueryParameter(API_KEY,BuildConfig.TMDB_API_KEY)
                         .appendQueryParameter(SORT_BY,sort_by_type)
                         .build();
 
@@ -205,10 +181,13 @@ public class MovieGridFragment extends Fragment {
         @Override
         protected void onPostExecute(MovieItem[] movieItems) {
             if (movieItems!=null){
-                mMovieAdapter.clear();
+                mMovieList.clear();
+
                 for (MovieItem movie : movieItems){
-                    mMovieAdapter.add(movie);
+                    mMovieList.add(movie);
                 }
+                adapter.notifyDataSetChanged();
+
             }
         }
     }

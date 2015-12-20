@@ -1,23 +1,35 @@
 package com.wordpress.rahulhp.freshmovies;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+
 /**
  * Created by root on 17/12/15.
  */
 public class MovieAdapter extends BaseAdapter {
+    private String LOG_TAG = MovieAdapter.class.getSimpleName();
     private Context mContext;
+    private ArrayList<MovieItem> mMovieList;
+    private Picasso builder;
 
-    public MovieAdapter(Context c){
-        mContext  = c;
+    public MovieAdapter(Context c,ArrayList<MovieItem> mMovieList){
+        this.mContext  = c;
+        this.mMovieList = mMovieList;
+        this.builder = Picasso.with(c);
+        builder.setIndicatorsEnabled(true);
+
     }
 
     public int getCount() {
-        return mThumbIds.length;
+        return mMovieList.size();
     }
 
     public Object getItem(int position) {
@@ -37,14 +49,13 @@ public class MovieAdapter extends BaseAdapter {
         } else {
             imageView = (ImageView) convertView;
         }
+        String url="http://image.tmdb.org/t/p/w185/".concat(mMovieList.get(position).poster_path);
+        Log.v(LOG_TAG, url);
 
-        imageView.setImageResource(mThumbIds[position]);
+        builder.with(mContext)
+                .load(url)
+                .into(imageView);
         return imageView;
     }
 
-    private Integer[] mThumbIds = {
-            R.drawable.art_clear, R.drawable.art_clouds,
-            R.drawable.art_fog,R.drawable.art_light_clouds,
-            R.drawable.art_light_rain,R.drawable.art_rain
-    };
 }
