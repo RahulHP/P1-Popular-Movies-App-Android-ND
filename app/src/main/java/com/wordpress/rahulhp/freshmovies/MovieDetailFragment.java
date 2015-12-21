@@ -25,7 +25,8 @@ public class MovieDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if(getArguments().containsKey("MOVIE")){
-            mMovieItem = savedInstanceState.getParcelable("MOVIE");
+
+            mMovieItem = getArguments().getParcelable("MOVIE");
 
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
