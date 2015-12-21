@@ -1,5 +1,6 @@
 package com.wordpress.rahulhp.freshmovies;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -13,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.json.JSONArray;
@@ -74,6 +76,18 @@ public class MovieGridFragment extends Fragment {
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview_movies);
         adapter = new MovieAdapter(getActivity(),mMovieList);
         gridView.setAdapter(adapter);
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.v(LOG_TAG,Integer.toString(position));
+                Intent intent = new Intent(getContext(),MovieDetailActvity.class);
+
+                intent.putExtra("MOVIE",mMovieList.get(position));
+                startActivity(intent);
+            }
+        });
         return rootView;
     }
 

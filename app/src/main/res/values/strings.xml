@@ -13,4 +13,5 @@
     <string name="title_activity_settings2">Settings</string>
 
     <string name="action_refresh">Refresh</string>
+    <string name="title_activity_movie_detail">MovieDetailActivity</string>
 </resources>
