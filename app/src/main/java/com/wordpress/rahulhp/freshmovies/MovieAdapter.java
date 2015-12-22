@@ -50,7 +50,7 @@ public class MovieAdapter extends BaseAdapter {
         } else {
             imageView = (ImageView) convertView;
         }
-        String url="http://image.tmdb.org/t/p/w185/".concat(mMovieList.get(position).poster_path);
+        String url="http://image.tmdb.org/t/p/w342/".concat(mMovieList.get(position).poster_path);
         Log.v(LOG_TAG, url);
 
         builder.with(mContext)

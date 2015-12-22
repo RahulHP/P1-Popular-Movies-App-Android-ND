@@ -13,14 +13,16 @@ public class MovieItem implements Parcelable{
     String release_date;
     String poster_path;
     Double popularity;
+    Double vote_average;
 
-    MovieItem(Long id,String original_title,String overview,String release_date,String poster_path, Double popularity){
+    MovieItem(Long id,String original_title,String overview,String release_date,String poster_path, Double popularity, Double vote_average){
         this.id=id;
         this.original_title=original_title;
         this.overview=overview;
         this.release_date=release_date;
         this.poster_path=poster_path;
         this.popularity=popularity;
+        this.vote_average=vote_average;
     }
 
     @Override
@@ -36,6 +38,7 @@ public class MovieItem implements Parcelable{
         dest.writeString(release_date);
         dest.writeString(poster_path);
         dest.writeDouble(popularity);
+        dest.writeDouble(vote_average);
     }
 
     @Override
@@ -49,6 +52,7 @@ public class MovieItem implements Parcelable{
         this.release_date=in.readString();
         this.poster_path=in.readString();
         this.popularity=in.readDouble();
+        this.vote_average=in.readDouble();
     }
 
     public static final Parcelable.Creator<MovieItem> CREATOR = new Parcelable.Creator<MovieItem>(){

@@ -39,12 +39,8 @@ public class MovieDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if(getArguments().containsKey("MOVIE")){
-
             mMovieItem = getArguments().getParcelable("MOVIE");
-
-
         }
     }
 
@@ -60,12 +56,16 @@ public class MovieDetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.movie_detail, container, false);
 
         if (mMovieItem != null){
-            ((TextView) rootView.findViewById(R.id.movie_overview)).setText(mMovieItem.overview);
-            ((TextView) rootView.findViewById(R.id.movie_title)).setText(mMovieItem.original_title);
-            String url="http://image.tmdb.org/t/p/w185/".concat(mMovieItem.poster_path);
+
+            ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.release_date.toString().substring(0,4));
+            String rating = mMovieItem.vote_average.toString().concat("/10");
+            ((TextView) rootView.findViewById(R.id.movie_vote_average)).setText(rating);
+            String url="http://image.tmdb.org/t/p/w342/".concat(mMovieItem.poster_path);
             Picasso.with(getActivity())
                     .load(url)
                     .into((ImageView) rootView.findViewById(R.id.movie_poster));
+
+            ((TextView) rootView.findViewById(R.id.movie_overview)).setText(mMovieItem.overview);
         }
 
         return rootView;

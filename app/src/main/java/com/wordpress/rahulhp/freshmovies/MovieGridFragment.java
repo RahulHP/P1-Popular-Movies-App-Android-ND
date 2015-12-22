@@ -107,6 +107,7 @@ public class MovieGridFragment extends Fragment {
             final String TMDB_OVERVIEW = "overview";
             final String TMDB_RELEASE_DATE = "release_date";
             final String TMDB_POPULARITY = "popularity";
+            final String TMDB_VOTE_AVERAGE = "vote_average";
 
 
 
@@ -124,8 +125,9 @@ public class MovieGridFragment extends Fragment {
                 String overview = movieJson.getString(TMDB_OVERVIEW);
                 String release_date = movieJson.getString(TMDB_RELEASE_DATE);
                 Double popularity = movieJson.getDouble(TMDB_POPULARITY);
+                Double vote_average = movieJson.getDouble(TMDB_VOTE_AVERAGE);
 
-                results[i] = new MovieItem(id,original_title,overview,release_date,poster_path, popularity);
+                results[i] = new MovieItem(id,original_title,overview,release_date,poster_path, popularity,vote_average);
 
             }
             return results;
