@@ -67,6 +67,7 @@ public class MovieGridFragment extends Fragment {
         movieTask.execute();
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
