@@ -1,7 +1,6 @@
 package com.wordpress.rahulhp.freshmovies;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -50,13 +49,16 @@ public class MovieAdapter extends BaseAdapter {
         } else {
             imageView = (ImageView) convertView;
         }
+
+        if (mMovieList.get(position).poster_path != null){
         String url="http://image.tmdb.org/t/p/w342/".concat(mMovieList.get(position).poster_path);
-        Log.v(LOG_TAG, url);
+
 
         builder.with(mContext)
                 .load(url)
                 .into(imageView);
-        imageView.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+        imageView.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));}
+
         return imageView;
     }
 

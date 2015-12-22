@@ -23,7 +23,7 @@ public class MovieDetailActvity extends AppCompatActivity {
         if (savedInstanceState == null){
             Bundle arguments = new Bundle();
             MovieItem mMovie = getIntent().getParcelableExtra("MOVIE");
-            Log.v("MOVIED",mMovie.original_title);
+            Log.v("MOVIED",mMovie.title);
             arguments.putParcelable("MOVIE",getIntent().getParcelableExtra("MOVIE"));
             Log.v("MOVIED-Test",arguments.getParcelable("MOVIE").toString());
             MovieDetailFragment fragment = new MovieDetailFragment();

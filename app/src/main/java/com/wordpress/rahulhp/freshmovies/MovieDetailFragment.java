@@ -1,7 +1,6 @@
 package com.wordpress.rahulhp.freshmovies;
 
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -10,14 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -28,7 +22,7 @@ public class MovieDetailFragment extends Fragment {
 
     private MovieItem mMovieItem;
     private ArrayList<TrailerItem> mTrailerList;
-    private TrailerAdapter trailerAdapter;
+    //private TrailerAdapter trailerAdapter;
 
     public MovieDetailFragment() {
     }
@@ -53,24 +47,24 @@ public class MovieDetailFragment extends Fragment {
             mMovieItem = getArguments().getParcelable("MOVIE");
         }
     }
-
+/*
     private void updateTrailers(){
         FetchTrailerTask trailerTask = new FetchTrailerTask();
         trailerTask.execute();
-    }
+    }*/
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Activity activity = this.getActivity();
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) {
-            appBarLayout.setTitle(mMovieItem.original_title);
+            appBarLayout.setTitle(mMovieItem.title);
         }
 
         View rootView = inflater.inflate(R.layout.movie_detail, container, false);
 
         if (mMovieItem != null){
-            ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.release_date.toString().substring(0, 4));
+            ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.release_date.substring(0, 4));
             String rating = mMovieItem.vote_average.toString().concat("/10");
             ((TextView) rootView.findViewById(R.id.movie_vote_average)).setText(rating);
             String url="http://image.tmdb.org/t/p/w342/".concat(mMovieItem.poster_path);
@@ -82,10 +76,10 @@ public class MovieDetailFragment extends Fragment {
 
             mTrailerList = new ArrayList<TrailerItem>();
 
-            updateTrailers();
-            ListView trailerListView = (ListView) rootView.findViewById(R.id.trailer_listview);
-            trailerAdapter = new TrailerAdaper(getActivity(),mTrailerList);
-            trailerListView.setAdapter(trailerAdapter);
+            /*updateTrailers();
+            ListView trailerListView = (ListView) rootView.findViewById(R.id.trailer_listview);*/
+            //trailerAdapter = new TrailerAdaper(getActivity(),mTrailerList);
+            //trailerListView.setAdapter(trailerAdapter);
 
 
 
@@ -95,7 +89,7 @@ public class MovieDetailFragment extends Fragment {
         return rootView;
     }
 
-
+/*
     public class FetchTrailerTask extends AsyncTask<Void,Void,TrailerItem[]>{
         private final String LOG_TAG = FetchTrailerTask.class.getSimpleName();
 
@@ -120,5 +114,5 @@ public class MovieDetailFragment extends Fragment {
 
 
         }
-    }
+    }*/
 }

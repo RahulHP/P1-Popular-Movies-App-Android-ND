@@ -17,13 +17,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.google.gson.Gson;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,7 +82,7 @@ public class MovieGridFragment extends Fragment {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.v(LOG_TAG,Integer.toString(position));
+
                 Intent intent = new Intent(getContext(),MovieDetailActvity.class);
 
                 intent.putExtra("MOVIE",mMovieList.get(position));
@@ -99,40 +98,12 @@ public class MovieGridFragment extends Fragment {
 
         private MovieItem[] getMovieListFromJson(String resultJsonstr)
             throws JSONException{
+            Gson gson = new Gson();
+            MovieApiHelper trial = gson.fromJson(resultJsonstr,MovieApiHelper.class);
 
-            final String TMDB_RESULTS="results";
-
-            final String TMDB_POSTER_PATH = "poster_path";
-            final String TMDB_ID = "id";
-            final String TMDB_TITLE = "title";
-            final String TMDB_OVERVIEW = "overview";
-            final String TMDB_RELEASE_DATE = "release_date";
-            final String TMDB_POPULARITY = "popularity";
-            final String TMDB_VOTE_AVERAGE = "vote_average";
-
-
-
-            JSONObject initialJson = new JSONObject(resultJsonstr);
-            JSONArray resultsArray = initialJson.getJSONArray(TMDB_RESULTS);
-
-            MovieItem[] results = new MovieItem[resultsArray.length()];
-
-            for (int i=0 ; i< results.length;i++){
-                JSONObject movieJson = resultsArray.getJSONObject(i);
-
-                String poster_path = movieJson.getString(TMDB_POSTER_PATH);
-                Long id = movieJson.getLong(TMDB_ID);
-                String original_title = movieJson.getString(TMDB_TITLE);
-                String overview = movieJson.getString(TMDB_OVERVIEW);
-                String release_date = movieJson.getString(TMDB_RELEASE_DATE);
-                Double popularity = movieJson.getDouble(TMDB_POPULARITY);
-                Double vote_average = movieJson.getDouble(TMDB_VOTE_AVERAGE);
-
-                results[i] = new MovieItem(id,original_title,overview,release_date,poster_path, popularity,vote_average);
-
-            }
-            return results;
+            return trial.getResults();
         }
+
 
         @Override
         protected MovieItem[] doInBackground(Void... params) {
@@ -185,11 +156,12 @@ public class MovieGridFragment extends Fragment {
 
         @Override
         protected void onPostExecute(MovieItem[] movieItems) {
+            //Log.e(LOG_TAG,Integer.toString(movieItems.length));
             if (movieItems!=null){
                 mMovieList.clear();
-
                 for (MovieItem movie : movieItems){
                     mMovieList.add(movie);
+                    //Log.e(LOG_TAG,movie.title);
                 }
                 adapter.notifyDataSetChanged();
 
