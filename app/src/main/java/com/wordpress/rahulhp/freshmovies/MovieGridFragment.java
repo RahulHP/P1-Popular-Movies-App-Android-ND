@@ -72,6 +72,8 @@ public class MovieGridFragment extends Fragment {
                              Bundle savedInstanceState) {
         mMovieList = new ArrayList<MovieItem>();
         updateMovies();
+
+
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview_movies);
         adapter = new MovieAdapter(getActivity(),mMovieList);
