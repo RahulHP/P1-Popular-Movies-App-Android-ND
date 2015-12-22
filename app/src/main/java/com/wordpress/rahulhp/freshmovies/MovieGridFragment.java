@@ -17,16 +17,15 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -136,80 +135,40 @@ public class MovieGridFragment extends Fragment {
         @Override
         protected MovieItem[] doInBackground(Void... params) {
 
-            SharedPreferences sharedPrefs =
-                    PreferenceManager.getDefaultSharedPreferences(getActivity());
-
-
-
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
             String resultJsonstr = null;
 
+            SharedPreferences sharedPrefs =
+                    PreferenceManager.getDefaultSharedPreferences(getActivity());
             String sort_by_type=sharedPrefs.getString(
                     getString(R.string.pref_sort_order_key),
                     getString(R.string.pref_sort_order_popularity_key));
 
-            try {
-                final String BASE_URL="http://api.themoviedb.org/3/discover/movie";
-                final String SORT_BY="sort_by";
-                final String API_KEY = "api_key";
+            final String BASE_URL="http://api.themoviedb.org/3/discover/movie";
+            final String SORT_BY="sort_by";
+            final String API_KEY = "api_key";
 
+            try {
                 Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY,BuildConfig.TMDB_API_KEY)
                         .appendQueryParameter(SORT_BY,sort_by_type)
                         .build();
 
-                URL url = new URL(builtUri.toString());
-                Log.v(LOG_TAG,url.toString());
-                // Create the request to OpenWeatherMap, and open the connection
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
 
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
-                    return null;
-                }
-
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-
-                resultJsonstr = buffer.toString();
+                OkHttpClient client = new OkHttpClient();
+                Request  request = new Request.Builder()
+                        .url(builtUri.toString())
+                        .build();
+                Response response = client.newCall(request).execute();
+                resultJsonstr = response.body().string();
 
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
                 // to parse it.
                 return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
             }
-            Log.d(LOG_TAG,resultJsonstr);
+
+
             try {
                 return getMovieListFromJson(resultJsonstr);
             } catch (JSONException e) {
