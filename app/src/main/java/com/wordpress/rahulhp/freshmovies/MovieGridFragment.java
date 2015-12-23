@@ -82,9 +82,7 @@ public class MovieGridFragment extends Fragment {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
                 Intent intent = new Intent(getContext(),MovieDetailActvity.class);
-
                 intent.putExtra("MOVIE",mMovieList.get(position));
                 startActivity(intent);
             }

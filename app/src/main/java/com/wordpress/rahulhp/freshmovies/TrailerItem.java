@@ -4,19 +4,22 @@ package com.wordpress.rahulhp.freshmovies;
  * Created by root on 22/12/15.
  */
 public class TrailerItem {
-    Long movie_id;
     String id;
+    String iso_639_1;
     String key;
     String name;
-    String type;
     String site;
+    int size;
+    String type;
 
-    public TrailerItem(Long movie_id, String id, String key, String name, String type, String site) {
-        this.movie_id = movie_id;
+
+    TrailerItem(String id, String iso_639_1, String key, String name, String site, int size, String type) {
         this.id = id;
+        this.iso_639_1 = iso_639_1;
         this.key = key;
         this.name = name;
-        this.type = type;
         this.site = site;
+        this.size = size;
+        this.type = type;
     }
 }

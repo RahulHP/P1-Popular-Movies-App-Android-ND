@@ -1,18 +1,29 @@
 package com.wordpress.rahulhp.freshmovies;
 
 import android.app.Activity;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -22,7 +33,7 @@ public class MovieDetailFragment extends Fragment {
 
     private MovieItem mMovieItem;
     private ArrayList<TrailerItem> mTrailerList;
-    //private TrailerAdapter trailerAdapter;
+    private TrailerAdapter trailerAdapter;
 
     public MovieDetailFragment() {
     }
@@ -47,11 +58,12 @@ public class MovieDetailFragment extends Fragment {
             mMovieItem = getArguments().getParcelable("MOVIE");
         }
     }
-/*
+
     private void updateTrailers(){
         FetchTrailerTask trailerTask = new FetchTrailerTask();
         trailerTask.execute();
-    }*/
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -64,6 +76,14 @@ public class MovieDetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.movie_detail, container, false);
 
         if (mMovieItem != null){
+
+            mTrailerList = new ArrayList<TrailerItem>();
+
+            updateTrailers();
+            GridView trailerListView = (GridView) rootView.findViewById(R.id.trailer_listview);
+            trailerAdapter = new TrailerAdapter(getActivity(),mTrailerList);
+            trailerListView.setAdapter(trailerAdapter);
+
             ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.release_date.substring(0, 4));
             String rating = mMovieItem.vote_average.toString().concat("/10");
             ((TextView) rootView.findViewById(R.id.movie_vote_average)).setText(rating);
@@ -74,12 +94,6 @@ public class MovieDetailFragment extends Fragment {
 
             ((TextView) rootView.findViewById(R.id.movie_overview)).setText(mMovieItem.overview);
 
-            mTrailerList = new ArrayList<TrailerItem>();
-
-            /*updateTrailers();
-            ListView trailerListView = (ListView) rootView.findViewById(R.id.trailer_listview);*/
-            //trailerAdapter = new TrailerAdaper(getActivity(),mTrailerList);
-            //trailerListView.setAdapter(trailerAdapter);
 
 
 
@@ -89,30 +103,67 @@ public class MovieDetailFragment extends Fragment {
         return rootView;
     }
 
-/*
-    public class FetchTrailerTask extends AsyncTask<Void,Void,TrailerItem[]>{
+
+    public class FetchTrailerTask extends AsyncTask<Void,Void,TrailerItem[]> {
         private final String LOG_TAG = FetchTrailerTask.class.getSimpleName();
 
         private TrailerItem[] getTrailerListFromJson(String resultJsonstr)
-            throws JSONException{
+            throws JSONException {
+            //Log.e(LOG_TAG,resultJsonstr);
+            Gson gson = new Gson();
+            TrailerApiHelper trailerApi = gson.fromJson(resultJsonstr,TrailerApiHelper.class);
+            //Log.e(LOG_TAG,trailerApi.Length());
+            return trailerApi.getResults();
+        }
 
-            final String TMDB_TRAILER_MOVIE_ID="id";
-            final String TMDB_TRAILER_RESULTS="results";
+        @Override
+        protected TrailerItem[] doInBackground(Void... params) {
+            String resultJsonstr = null;
 
-            final String TMDB_TRAILER_ID="id";
-            final String TMDB_TRAILER_KEY="key";
-            final String TMDB_TRAILER_NAME="name";
-            final String TMDB_TRAILER_SITE="site";
-            final String TMDB_TRAILER_TYPE="type";
+            final String BASE_URL="http://api.themoviedb.org/3/movie/".concat(Long.toString(mMovieItem.id)).concat("/videos");
+            final String API_KEY = "api_key";
 
-            JSONObject initialJson = new JSONObject(resultJsonstr);
+            try {
 
-            long movie_id = initialJson.getLong(TMDB_TRAILER_MOVIE_ID);
+                Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                        .appendQueryParameter(API_KEY,BuildConfig.TMDB_API_KEY)
+                        .build();
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(builtUri.toString())
+                        .build();
+                //Log.e(LOG_TAG,builtUri.toString());
+                Response response = client.newCall(request).execute();
+                resultJsonstr = response.body().string();
+            }
+            catch (IOException e){
+                Log.e(LOG_TAG, "Error ", e);
+                return null;
+            }
 
-            JSONArray resultsArray = initialJson.getJSONArray(TMDB_TRAILER_RESULTS);
+            try {
+                return getTrailerListFromJson(resultJsonstr);
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
 
-
+            return null;
 
         }
-    }*/
+
+        @Override
+        protected void onPostExecute(TrailerItem[] trailerItems) {
+
+            if (trailerItems!=null){
+                mTrailerList.clear();
+                for (TrailerItem trailerItem:trailerItems){
+                    mTrailerList.add(trailerItem);
+                }
+                trailerAdapter.notifyDataSetChanged();
+
+            }
+
+        }
+    }
 }
