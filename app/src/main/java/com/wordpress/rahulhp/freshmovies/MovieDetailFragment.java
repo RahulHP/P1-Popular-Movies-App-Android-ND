@@ -12,9 +12,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * Created by root on 21/12/15.
  */
 public class MovieDetailFragment extends Fragment {
-
+    public View rootView;
     private MovieItem mMovieItem;
     private ArrayList<TrailerItem> mTrailerList;
     private TrailerAdapter trailerAdapter;
@@ -75,26 +75,14 @@ public class MovieDetailFragment extends Fragment {
             appBarLayout.setTitle(mMovieItem.title);
         }
 
-        View rootView = inflater.inflate(R.layout.movie_detail, container, false);
-
+        rootView = inflater.inflate(R.layout.movie_detail, container, false);
+        RelativeLayout trailer_trial = (RelativeLayout) rootView.findViewById(R.id.trailer_trial);
         if (mMovieItem != null){
 
             mTrailerList = new ArrayList<TrailerItem>();
 
             updateTrailers();
-            ListView trailerListView = (ListView) rootView.findViewById(R.id.trailer_listview);
-            trailerAdapter = new TrailerAdapter(getActivity(),mTrailerList);
-            trailerListView.setAdapter(trailerAdapter);
 
-            trailerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String url = "http://www.youtube.com/watch?v=".concat(mTrailerList.get(position).key);
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-
-                }
-            });
 
             ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.release_date.substring(0, 4));
             String rating = mMovieItem.vote_average.toString().concat("/10");
@@ -105,10 +93,6 @@ public class MovieDetailFragment extends Fragment {
                     .into((ImageView) rootView.findViewById(R.id.movie_poster));
 
             ((TextView) rootView.findViewById(R.id.movie_overview)).setText(mMovieItem.overview);
-
-
-
-
 
         }
 
@@ -172,8 +156,26 @@ public class MovieDetailFragment extends Fragment {
                 for (TrailerItem trailerItem:trailerItems){
                     mTrailerList.add(trailerItem);
                 }
-                trailerAdapter.notifyDataSetChanged();
+                //trailerAdapter.notifyDataSetChanged();
 
+            }
+            //https://discussions.udacity.com/t/what-is-the-best-way-to-show-trailers-and-reviews/33464/6?u=rahulhp
+            LinearLayout trailer_trial = (LinearLayout) rootView.findViewById(R.id.main_movie_layout);
+            for (final TrailerItem mTrailer : mTrailerList){
+                View mTrailerRow = LayoutInflater.from(getActivity()).inflate(R.layout.trailer_row, null);
+
+                mTrailerRow.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String url = "http://www.youtube.com/watch?v=".concat(mTrailer.key);
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    }
+                });
+
+                TextView textView = (TextView) mTrailerRow.findViewById(R.id.trailer_name);
+                textView.setText(mTrailer.name);
+
+                trailer_trial.addView(mTrailerRow);
             }
 
         }
