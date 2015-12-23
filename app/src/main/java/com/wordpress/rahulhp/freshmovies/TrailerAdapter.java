@@ -1,6 +1,7 @@
 package com.wordpress.rahulhp.freshmovies;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -38,14 +39,13 @@ public class TrailerAdapter extends BaseAdapter {
         TextView textView;
         if (convertView == null) {
             // if it's not recycled, initialize some attributes
-            textView = new TextView(mContext);
-
-        } else {
-            textView = (TextView) convertView;
+            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.trailer_row,parent,false);
         }
 
+        textView = (TextView) convertView.findViewById(R.id.trailer_name);
         textView.setText(mTrailerList.get(position).name);
 
-        return textView;
+        return convertView;
     }
 }

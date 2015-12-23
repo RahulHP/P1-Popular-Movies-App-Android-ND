@@ -13,8 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -82,7 +82,7 @@ public class MovieDetailFragment extends Fragment {
             mTrailerList = new ArrayList<TrailerItem>();
 
             updateTrailers();
-            GridView trailerListView = (GridView) rootView.findViewById(R.id.trailer_listview);
+            ListView trailerListView = (ListView) rootView.findViewById(R.id.trailer_listview);
             trailerAdapter = new TrailerAdapter(getActivity(),mTrailerList);
             trailerListView.setAdapter(trailerAdapter);
 
@@ -95,6 +95,7 @@ public class MovieDetailFragment extends Fragment {
 
                 }
             });
+
             ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.release_date.substring(0, 4));
             String rating = mMovieItem.vote_average.toString().concat("/10");
             ((TextView) rootView.findViewById(R.id.movie_vote_average)).setText(rating);
