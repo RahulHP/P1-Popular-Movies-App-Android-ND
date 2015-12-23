@@ -1,6 +1,7 @@
 package com.wordpress.rahulhp.freshmovies;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -84,6 +86,15 @@ public class MovieDetailFragment extends Fragment {
             trailerAdapter = new TrailerAdapter(getActivity(),mTrailerList);
             trailerListView.setAdapter(trailerAdapter);
 
+            trailerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    String url = "http://www.youtube.com/watch?v=".concat(mTrailerList.get(position).key);
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+
+                }
+            });
             ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.release_date.substring(0, 4));
             String rating = mMovieItem.vote_average.toString().concat("/10");
             ((TextView) rootView.findViewById(R.id.movie_vote_average)).setText(rating);

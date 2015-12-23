@@ -43,8 +43,7 @@ public class TrailerAdapter extends BaseAdapter {
         } else {
             textView = (TextView) convertView;
         }
-        //Log.e(LOG_TAG,"Length of mTrailerList is " + mTrailerList.size()+"at position " + position);
-        //Log.e("TrailerA",mTrailerList.get(position).name);
+
         textView.setText(mTrailerList.get(position).name);
 
         return textView;
