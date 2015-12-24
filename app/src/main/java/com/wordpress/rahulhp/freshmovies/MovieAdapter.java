@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.squareup.picasso.Picasso;
+import com.wordpress.rahulhp.freshmovies.Classes.MovieItem;
 
 import java.util.ArrayList;
 
@@ -50,8 +51,8 @@ public class MovieAdapter extends BaseAdapter {
             imageView = (ImageView) convertView;
         }
 
-        if (mMovieList.get(position).poster_path != null){
-        String url="http://image.tmdb.org/t/p/w342/".concat(mMovieList.get(position).poster_path);
+        if (mMovieList.get(position).getPoster_path() != null){
+        String url="http://image.tmdb.org/t/p/w342/".concat(mMovieList.get(position).getPoster_path());
 
 
         builder.with(mContext)

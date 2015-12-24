@@ -1,4 +1,4 @@
-package com.wordpress.rahulhp.freshmovies;
+package com.wordpress.rahulhp.freshmovies.Classes;
 
 /**
  * Created by root on 22/12/15.
@@ -14,7 +14,7 @@ public class MovieApiHelper {
 
     @Override
     public String toString() {
-        return Integer.toString(page).concat(results[0].title);
+        return Integer.toString(page).concat(results[0].getTitle());
     }
 
     public MovieItem[] getResults() {

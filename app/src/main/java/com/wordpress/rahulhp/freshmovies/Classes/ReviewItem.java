@@ -1,4 +1,4 @@
-package com.wordpress.rahulhp.freshmovies;
+package com.wordpress.rahulhp.freshmovies.Classes;
 
 /**
  * Created by root on 24/12/15.

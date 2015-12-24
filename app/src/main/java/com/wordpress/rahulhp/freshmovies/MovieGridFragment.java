@@ -21,6 +21,8 @@ import com.google.gson.Gson;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+import com.wordpress.rahulhp.freshmovies.Classes.MovieApiHelper;
+import com.wordpress.rahulhp.freshmovies.Classes.MovieItem;
 
 import org.json.JSONException;
 

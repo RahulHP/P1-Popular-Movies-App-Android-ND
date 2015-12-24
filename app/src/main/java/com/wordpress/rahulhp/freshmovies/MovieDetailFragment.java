@@ -21,6 +21,11 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import com.squareup.picasso.Picasso;
+import com.wordpress.rahulhp.freshmovies.Classes.MovieItem;
+import com.wordpress.rahulhp.freshmovies.Classes.ReviewApiHelper;
+import com.wordpress.rahulhp.freshmovies.Classes.ReviewItem;
+import com.wordpress.rahulhp.freshmovies.Classes.TrailerApiHelper;
+import com.wordpress.rahulhp.freshmovies.Classes.TrailerItem;
 
 import org.json.JSONException;
 
@@ -32,7 +37,6 @@ import java.io.IOException;
 public class MovieDetailFragment extends Fragment {
     public View rootView;
     private MovieItem mMovieItem;
-
 
 
     public MovieDetailFragment() {
@@ -70,7 +74,7 @@ public class MovieDetailFragment extends Fragment {
         Activity activity = this.getActivity();
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) {
-            appBarLayout.setTitle(mMovieItem.title);
+            appBarLayout.setTitle(mMovieItem.getTitle());
         }
 
         rootView = inflater.inflate(R.layout.movie_detail, container, false);
@@ -85,15 +89,15 @@ public class MovieDetailFragment extends Fragment {
 
     void addMovieDetails(MovieItem mMovieItem,View rootView){
 
-        ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.release_date.substring(0, 4));
-        String rating = mMovieItem.vote_average.toString().concat("/10");
+        ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.getRelease_date().substring(0, 4));
+        String rating = mMovieItem.getVote_average().toString().concat("/10");
         ((TextView) rootView.findViewById(R.id.movie_vote_average)).setText(rating);
-        String url="http://image.tmdb.org/t/p/w342/".concat(mMovieItem.poster_path);
+        String url="http://image.tmdb.org/t/p/w342/".concat(mMovieItem.getPoster_path());
         Picasso.with(getActivity())
                 .load(url)
                 .into((ImageView) rootView.findViewById(R.id.movie_poster));
 
-        ((TextView) rootView.findViewById(R.id.movie_overview)).setText(mMovieItem.overview);
+        ((TextView) rootView.findViewById(R.id.movie_overview)).setText(mMovieItem.getOverview());
     }
 
     public class FetchObjectTask extends AsyncTask<String,Void,Object[]>{
@@ -120,7 +124,7 @@ public class MovieDetailFragment extends Fragment {
 
             String resultJsonstr;
 
-            final String BASE_URL="http://api.themoviedb.org/3/movie/".concat(Long.toString(mMovieItem.id)).concat("/").concat(object_type);
+            final String BASE_URL="http://api.themoviedb.org/3/movie/".concat(Long.toString(mMovieItem.getId())).concat("/").concat(object_type);
             final String API_KEY = "api_key";
 
             try {
@@ -186,13 +190,13 @@ public class MovieDetailFragment extends Fragment {
                 mTrailerRow.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        String url = "http://www.youtube.com/watch?v=".concat(mTrailer.key);
+                        String url = "http://www.youtube.com/watch?v=".concat(mTrailer.getKey());
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     }
                 });
 
                 TextView textView = (TextView) mTrailerRow.findViewById(R.id.trailer_name);
-                textView.setText(mTrailer.name);
+                textView.setText(mTrailer.getName());
 
                 movie_detail_layout.addView(mTrailerRow);
             }

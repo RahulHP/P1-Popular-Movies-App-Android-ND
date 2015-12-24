@@ -1,4 +1,4 @@
-package com.wordpress.rahulhp.freshmovies;
+package com.wordpress.rahulhp.freshmovies.Classes;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -14,6 +14,34 @@ public class MovieItem implements Parcelable{
     String poster_path;
     Double popularity;
     Double vote_average;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getOverview() {
+        return overview;
+    }
+
+    public String getRelease_date() {
+        return release_date;
+    }
+
+    public String getPoster_path() {
+        return poster_path;
+    }
+
+    public Double getPopularity() {
+        return popularity;
+    }
+
+    public Double getVote_average() {
+        return vote_average;
+    }
 
     MovieItem(Long id,String title,String overview,String release_date,String poster_path, Double popularity, Double vote_average){
         this.id=id;

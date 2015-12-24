@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.wordpress.rahulhp.freshmovies.Classes.TrailerItem;
+
 import java.util.ArrayList;
 
 /**
@@ -44,7 +46,7 @@ public class TrailerAdapter extends BaseAdapter {
         }
 
         textView = (TextView) convertView.findViewById(R.id.trailer_name);
-        textView.setText(mTrailerList.get(position).name);
+        textView.setText(mTrailerList.get(position).getName());
 
         return convertView;
     }
