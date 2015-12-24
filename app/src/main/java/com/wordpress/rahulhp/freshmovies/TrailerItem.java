@@ -22,4 +22,5 @@ public class TrailerItem {
         this.size = size;
         this.type = type;
     }
+
 }

@@ -25,16 +25,14 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
- * Created by root on 21/12/15.
+ * Created by RahulHP on 21/12/15.
  */
 public class MovieDetailFragment extends Fragment {
     public View rootView;
     private MovieItem mMovieItem;
-    private ArrayList<TrailerItem> mTrailerList;
-    private ArrayList<ReviewItem> mReviewList;
+
 
 
     public MovieDetailFragment() {
@@ -61,12 +59,9 @@ public class MovieDetailFragment extends Fragment {
         }
     }
 
-    private void updateTrailers(){
-        FetchTrailerTask trailerTask = new FetchTrailerTask();
-        trailerTask.execute();
-
-        FetchMiscTask miscTask = new FetchMiscTask();
-        miscTask.execute();
+    private void updateReviewsAndTrailers(){
+        new FetchObjectTask("videos").execute();
+        new FetchObjectTask("reviews").execute();
     }
 
     @Nullable
@@ -81,45 +76,51 @@ public class MovieDetailFragment extends Fragment {
         rootView = inflater.inflate(R.layout.movie_detail, container, false);
 
         if (mMovieItem != null){
-
-            mTrailerList = new ArrayList<TrailerItem>();
-            mReviewList = new ArrayList<ReviewItem>();
-
-            updateTrailers();
-
-
-            ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.release_date.substring(0, 4));
-            String rating = mMovieItem.vote_average.toString().concat("/10");
-            ((TextView) rootView.findViewById(R.id.movie_vote_average)).setText(rating);
-            String url="http://image.tmdb.org/t/p/w342/".concat(mMovieItem.poster_path);
-            Picasso.with(getActivity())
-                    .load(url)
-                    .into((ImageView) rootView.findViewById(R.id.movie_poster));
-
-            ((TextView) rootView.findViewById(R.id.movie_overview)).setText(mMovieItem.overview);
-
+            addMovieDetails(mMovieItem, rootView);
+            updateReviewsAndTrailers();
         }
 
         return rootView;
     }
 
-    public class FetchMiscTask extends AsyncTask<Void,Void,ReviewItem[]>{
-        private final String LOG_TAG = FetchMiscTask.class.getSimpleName();
+    void addMovieDetails(MovieItem mMovieItem,View rootView){
 
-        private ReviewItem[] getTrailerListFromJson(String resultJsonstr)
-                throws JSONException {
-            Log.e(LOG_TAG,resultJsonstr);
+        ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.release_date.substring(0, 4));
+        String rating = mMovieItem.vote_average.toString().concat("/10");
+        ((TextView) rootView.findViewById(R.id.movie_vote_average)).setText(rating);
+        String url="http://image.tmdb.org/t/p/w342/".concat(mMovieItem.poster_path);
+        Picasso.with(getActivity())
+                .load(url)
+                .into((ImageView) rootView.findViewById(R.id.movie_poster));
+
+        ((TextView) rootView.findViewById(R.id.movie_overview)).setText(mMovieItem.overview);
+    }
+
+    public class FetchObjectTask extends AsyncTask<String,Void,Object[]>{
+        final String LOG_TAG = FetchObjectTask.class.getSimpleName();
+        String object_type;
+
+        public FetchObjectTask(String object_type) {
+            this.object_type = object_type;
+        }
+
+        private Object[] getItemListFromJson (String resultJsonstr) throws JSONException{
             Gson gson = new Gson();
-            ReviewApiHelper reviewApi = gson.fromJson(resultJsonstr,ReviewApiHelper.class);
-            Log.e(LOG_TAG,Integer.toString(reviewApi.getResults().length));
-            return reviewApi.getResults();
+            if (object_type.equals("reviews")){
+                ReviewApiHelper reviewApi = gson.fromJson(resultJsonstr,ReviewApiHelper.class);
+                return reviewApi.getResults();
+            } else {
+                TrailerApiHelper trailerApi = gson.fromJson(resultJsonstr,TrailerApiHelper.class);
+                return trailerApi.getResults();
+            }
         }
 
         @Override
-        protected ReviewItem[] doInBackground(Void... params) {
-            String resultJsonstr = null;
+        protected Object[] doInBackground(String... params) {
 
-            final String BASE_URL="http://api.themoviedb.org/3/movie/".concat(Long.toString(mMovieItem.id)).concat("/reviews");
+            String resultJsonstr;
+
+            final String BASE_URL="http://api.themoviedb.org/3/movie/".concat(Long.toString(mMovieItem.id)).concat("/").concat(object_type);
             final String API_KEY = "api_key";
 
             try {
@@ -131,7 +132,6 @@ public class MovieDetailFragment extends Fragment {
                 Request request = new Request.Builder()
                         .url(builtUri.toString())
                         .build();
-                //Log.e(LOG_TAG,builtUri.toString());
                 Response response = client.newCall(request).execute();
                 resultJsonstr = response.body().string();
             }
@@ -141,31 +141,19 @@ public class MovieDetailFragment extends Fragment {
             }
 
             try {
-                return getTrailerListFromJson(resultJsonstr);
+                return getItemListFromJson(resultJsonstr);
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
             }
 
             return null;
-
         }
 
-        @Override
-        protected void onPostExecute(ReviewItem[] reviewItems) {
-            Log.e(LOG_TAG,"In onPostExecute");
-            Log.e(LOG_TAG,Integer.toString(reviewItems.length));
-            if (reviewItems!=null){
-                mReviewList.clear();
-                for (ReviewItem reviewItem:reviewItems){
-                    Log.e(LOG_TAG,reviewItem.getAuthor());
-                    mReviewList.add(reviewItem);
-                }
-            }
-
-            //https://discussions.udacity.com/t/what-is-the-best-way-to-show-trailers-and-reviews/33464/6?u=rahulhp
-            LinearLayout trailer_trial = (LinearLayout) rootView.findViewById(R.id.main_movie_layout);
-            for (final ReviewItem mReview : mReviewList){
+        void createReviewView(Object[] objects){
+            LinearLayout movie_detail_layout = (LinearLayout) rootView.findViewById(R.id.main_movie_layout);
+            for (Object object : objects){
+                final ReviewItem mReview = (ReviewItem) object;
                 View mReviewRow = LayoutInflater.from(getActivity()).inflate(R.layout.review_row, null);
 
                 mReviewRow.setOnClickListener(new View.OnClickListener() {
@@ -174,84 +162,25 @@ public class MovieDetailFragment extends Fragment {
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(mReview.getUrl())));
                     }
                 });
-                String review_text=null;
+                String review_text;
                 TextView textView = (TextView) mReviewRow.findViewById(R.id.review_text);
                 if (mReview.getContent().length() <= 498){
                     review_text = mReview.getContent();
                 }
                 else {
-                review_text = mReview.getContent().substring(0,500);
+                    review_text = mReview.getContent().substring(0,500);
                 }
-                Log.e(LOG_TAG,review_text);
+
                 textView.setText(review_text);
 
-                trailer_trial.addView(mReviewRow);
+                movie_detail_layout.addView(mReviewRow);
             }
-
-        }
-    }
-    public class FetchTrailerTask extends AsyncTask<Void,Void,TrailerItem[]> {
-        private final String LOG_TAG = FetchTrailerTask.class.getSimpleName();
-
-        private TrailerItem[] getTrailerListFromJson(String resultJsonstr)
-            throws JSONException {
-            //Log.e(LOG_TAG,resultJsonstr);
-            Gson gson = new Gson();
-            TrailerApiHelper trailerApi = gson.fromJson(resultJsonstr,TrailerApiHelper.class);
-            //Log.e(LOG_TAG,trailerApi.Length());
-            return trailerApi.getResults();
         }
 
-        @Override
-        protected TrailerItem[] doInBackground(Void... params) {
-            String resultJsonstr = null;
-
-            final String BASE_URL="http://api.themoviedb.org/3/movie/".concat(Long.toString(mMovieItem.id)).concat("/videos");
-            final String API_KEY = "api_key";
-
-            try {
-
-                Uri builtUri = Uri.parse(BASE_URL).buildUpon()
-                        .appendQueryParameter(API_KEY,BuildConfig.TMDB_API_KEY)
-                        .build();
-                OkHttpClient client = new OkHttpClient();
-                Request request = new Request.Builder()
-                        .url(builtUri.toString())
-                        .build();
-                //Log.e(LOG_TAG,builtUri.toString());
-                Response response = client.newCall(request).execute();
-                resultJsonstr = response.body().string();
-            }
-            catch (IOException e){
-                Log.e(LOG_TAG, "Error ", e);
-                return null;
-            }
-
-            try {
-                return getTrailerListFromJson(resultJsonstr);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-
-            return null;
-
-        }
-
-        @Override
-        protected void onPostExecute(TrailerItem[] trailerItems) {
-
-            if (trailerItems!=null){
-                mTrailerList.clear();
-                for (TrailerItem trailerItem:trailerItems){
-                    mTrailerList.add(trailerItem);
-                }
-                //trailerAdapter.notifyDataSetChanged();
-
-            }
-            //https://discussions.udacity.com/t/what-is-the-best-way-to-show-trailers-and-reviews/33464/6?u=rahulhp
-            LinearLayout trailer_trial = (LinearLayout) rootView.findViewById(R.id.main_movie_layout);
-            for (final TrailerItem mTrailer : mTrailerList){
+        void createTrailerView(Object[] objects){
+            LinearLayout movie_detail_layout = (LinearLayout) rootView.findViewById(R.id.main_movie_layout);
+            for (Object object : objects){
+                final TrailerItem mTrailer = (TrailerItem) object;
                 View mTrailerRow = LayoutInflater.from(getActivity()).inflate(R.layout.trailer_row, null);
 
                 mTrailerRow.setOnClickListener(new View.OnClickListener() {
@@ -265,9 +194,20 @@ public class MovieDetailFragment extends Fragment {
                 TextView textView = (TextView) mTrailerRow.findViewById(R.id.trailer_name);
                 textView.setText(mTrailer.name);
 
-                trailer_trial.addView(mTrailerRow);
+                movie_detail_layout.addView(mTrailerRow);
             }
-
+        }
+        
+        @Override
+        protected void onPostExecute(Object[] objects) {
+            if (objects != null){
+                if (object_type.equals("reviews")){
+                    createReviewView(objects);
+                } else {
+                    createTrailerView(objects);
+                }
+            }
         }
     }
+
 }
