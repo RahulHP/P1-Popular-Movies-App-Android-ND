@@ -1,5 +1,6 @@
 package com.wordpress.rahulhp.freshmovies;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -18,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -27,7 +29,10 @@ import com.wordpress.rahulhp.freshmovies.Classes.MovieItem;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -126,6 +131,12 @@ public class MovieGridFragment extends Fragment {
             return trial.getResults();
         }
 
+        private MovieItem getSingleMovieFromJson(String resultJsonstr)
+            throws JSONException{
+            Gson gson = new Gson();
+            MovieItem movie = gson.fromJson(resultJsonstr,MovieItem.class);
+            return movie;
+        }
 
         @Override
         protected MovieItem[] doInBackground(Void... params) {
@@ -137,38 +148,89 @@ public class MovieGridFragment extends Fragment {
             String sort_by_type=sharedPrefs.getString(
                     getString(R.string.pref_sort_order_key),
                     getString(R.string.pref_sort_order_popularity_key));
+            if (sort_by_type==getString(R.string.pref_sort_order_highest_rated_key) ||
+                    sort_by_type == getString(R.string.pref_sort_order_popularity_key)){
+                final String BASE_URL="http://api.themoviedb.org/3/discover/movie";
+                final String SORT_BY="sort_by";
+                final String API_KEY = "api_key";
 
-            final String BASE_URL="http://api.themoviedb.org/3/discover/movie";
-            final String SORT_BY="sort_by";
-            final String API_KEY = "api_key";
-
-            try {
-                Uri builtUri = Uri.parse(BASE_URL).buildUpon()
-                        .appendQueryParameter(API_KEY,BuildConfig.TMDB_API_KEY)
-                        .appendQueryParameter(SORT_BY,sort_by_type)
-                        .build();
-
-
-                OkHttpClient client = new OkHttpClient();
-                Request  request = new Request.Builder()
-                        .url(builtUri.toString())
-                        .build();
-                Response response = client.newCall(request).execute();
-                resultJsonstr = response.body().string();
-
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attemping
-                // to parse it.
-                return null;
-            }
+                try {
+                    Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                            .appendQueryParameter(API_KEY,BuildConfig.TMDB_API_KEY)
+                            .appendQueryParameter(SORT_BY,sort_by_type)
+                            .build();
 
 
-            try {
-                return getMovieListFromJson(resultJsonstr);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
+                    OkHttpClient client = new OkHttpClient();
+                    Request  request = new Request.Builder()
+                            .url(builtUri.toString())
+                            .build();
+                    Response response = client.newCall(request).execute();
+                    resultJsonstr = response.body().string();
+
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Error ", e);
+                    // If the code didn't successfully get the weather data, there's no point in attemping
+                    // to parse it.
+                    return null;
+                }
+
+
+                try {
+                    return getMovieListFromJson(resultJsonstr);
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, e.getMessage(), e);
+                    e.printStackTrace();
+                }
+
+            } else {
+                SharedPreferences pref = getActivity().getApplicationContext().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+                Set<Long> favMovies;
+                Gson gson = new Gson();
+                String favMoviesJson = pref.getString("FAVS", null);
+                if (favMoviesJson != null) {
+                    Type type = new TypeToken<HashSet<Long>>(){}.getType();
+                    favMovies = gson.fromJson(favMoviesJson,type);
+                    MovieItem[] movieItems = new MovieItem[favMovies.size()];
+                    int count=0;
+                    for (Long movie_id : favMovies){
+                        final String BASE_URL="http://api.themoviedb.org/3/movie";
+                        final String API_KEY = "api_key";
+                        try {
+                            Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                                    .appendPath(Long.toString(movie_id))
+                                    .appendQueryParameter(API_KEY,BuildConfig.TMDB_API_KEY)
+                                    .build();
+
+                            OkHttpClient client = new OkHttpClient();
+                            Request  request = new Request.Builder()
+                                    .url(builtUri.toString())
+                                    .build();
+                            Response response = client.newCall(request).execute();
+                            resultJsonstr = response.body().string();
+
+                        } catch (IOException e) {
+                            Log.e(LOG_TAG, "Error ", e);
+                            // If the code didn't successfully get the weather data, there's no point in attemping
+                            // to parse it.
+                            return null;
+                        }
+
+                        try {
+                            movieItems[count]=getSingleMovieFromJson(resultJsonstr);
+                            count++;
+                        } catch (JSONException e) {
+                            Log.e(LOG_TAG, e.getMessage(), e);
+                            e.printStackTrace();
+                        }
+
+
+
+                    }
+                    return movieItems;
+                }
+
+
             }
 
             // This will only happen if there was an error getting or parsing the forecast.
@@ -183,7 +245,6 @@ public class MovieGridFragment extends Fragment {
                 mMovieList.clear();
                 for (MovieItem movie : movieItems){
                     mMovieList.add(movie);
-                    //Log.e(LOG_TAG,movie.title);
                 }
                 adapter.notifyDataSetChanged();
 

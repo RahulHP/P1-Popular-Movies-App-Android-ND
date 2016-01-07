@@ -10,6 +10,10 @@
 
     <string name="pref_sort_order_highest_rated_label">Highest Rated</string>
     <string name="pref_sort_order_highest_rated_key" translatable="false">vote_average.desc</string>
+
+    <string name="pref_favorites_label">My Favorites</string>
+    <string name="pref_favorites_key" translatable="false">favorites</string>
+
     <string name="title_activity_settings2">Settings</string>
 
     <string name="action_refresh">Refresh</string>

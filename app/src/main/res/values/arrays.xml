@@ -3,11 +3,13 @@
     <string-array name="pref_sort_order_labels">
         <item>@string/pref_sort_order_popularity_label</item>
         <item>@string/pref_sort_order_highest_rated_label</item>
+        <item>@string/pref_favorites_label</item>
     </string-array>
 
     <string-array name="pref_sort_order_keys">
         <item>@string/pref_sort_order_popularity_key</item>
         <item>@string/pref_sort_order_highest_rated_key</item>
+        <item>@string/pref_favorites_key</item>
     </string-array>
 
 
