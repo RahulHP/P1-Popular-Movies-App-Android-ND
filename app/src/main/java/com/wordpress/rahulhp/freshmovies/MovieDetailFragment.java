@@ -1,6 +1,7 @@
 package com.wordpress.rahulhp.freshmovies;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -37,7 +38,7 @@ import java.io.IOException;
 public class MovieDetailFragment extends Fragment {
     public View rootView;
     private MovieItem mMovieItem;
-
+    private String LOG_TAG = MovieDetailFragment.class.getSimpleName();
 
     public MovieDetailFragment() {
     }
@@ -57,9 +58,12 @@ public class MovieDetailFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        //Log.e(LOG_TAG,"Creating");
         super.onCreate(savedInstanceState);
         if(getArguments().containsKey("MOVIE")){
             mMovieItem = getArguments().getParcelable("MOVIE");
+            assert mMovieItem != null;
+            //Log.e(LOG_TAG,mMovieItem.getTitle());
         }
     }
 
@@ -71,6 +75,7 @@ public class MovieDetailFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        //Log.e(LOG_TAG,"onCreateView");
         Activity activity = this.getActivity();
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) {
@@ -158,7 +163,8 @@ public class MovieDetailFragment extends Fragment {
             LinearLayout movie_detail_layout = (LinearLayout) rootView.findViewById(R.id.main_movie_layout);
             for (Object object : objects){
                 final ReviewItem mReview = (ReviewItem) object;
-                View mReviewRow = LayoutInflater.from(getActivity()).inflate(R.layout.review_row, null);
+                LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View mReviewRow = inflater.inflate(R.layout.review_row, null);
 
                 mReviewRow.setOnClickListener(new View.OnClickListener() {
                     @Override

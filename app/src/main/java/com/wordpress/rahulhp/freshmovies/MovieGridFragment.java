@@ -36,6 +36,7 @@ public class MovieGridFragment extends Fragment {
     private String LOG_TAG = MovieGridFragment.class.getSimpleName();
     private ArrayList<MovieItem> mMovieList;
     private MovieAdapter adapter;
+    private boolean mTwoPane=false;
     public MovieGridFragment(){}
 
     @Override
@@ -43,6 +44,14 @@ public class MovieGridFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // Add this line in order for this fragment to handle menu events.
         setHasOptionsMenu(true);
+        if (getArguments().containsKey("mTwoPane")){
+            mTwoPane = getArguments().getBoolean("mTwoPane");
+            /*if (mTwoPane){
+                Log.e(LOG_TAG,"TWO PANES");
+            } else {
+                Log.e(LOG_TAG,"SINGLE PANE");
+            }*/
+        }
     }
 
     @Override
@@ -84,9 +93,22 @@ public class MovieGridFragment extends Fragment {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mTwoPane){
+                    //Log.e(LOG_TAG,"TWO PANESa");
+                    Bundle arguments = new Bundle();
+                    arguments.putParcelable("MOVIE",mMovieList.get(position));
+                    MovieDetailFragment fragment = new MovieDetailFragment();
+                    fragment.setArguments(arguments);
+                    //Log.e(LOG_TAG, "Launching");
+                    getActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.movie_detail_container,fragment)
+                            .commit();
+                } else {
+                    //Log.e(LOG_TAG,"SINGLE PANEa");
                 Intent intent = new Intent(getContext(),MovieDetailActvity.class);
                 intent.putExtra("MOVIE",mMovieList.get(position));
-                startActivity(intent);
+                startActivity(intent);}
+
             }
         });
         return rootView;

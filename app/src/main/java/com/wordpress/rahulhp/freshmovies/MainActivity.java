@@ -7,16 +7,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
-
+    private boolean mTwoPane=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (findViewById(R.id.movie_detail_container) != null) {
+            mTwoPane = true;
+        }
         if (savedInstanceState == null) {
+            Bundle arguments= new Bundle();
+            arguments.putBoolean("mTwoPane", mTwoPane);
+            MovieGridFragment fragment = new MovieGridFragment();
+            fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new MovieGridFragment())
+                    .add(R.id.container, fragment)
                     .commit();
         }
+
+
 
 
 
