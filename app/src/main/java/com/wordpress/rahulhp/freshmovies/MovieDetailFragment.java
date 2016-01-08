@@ -1,7 +1,6 @@
 package com.wordpress.rahulhp.freshmovies;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -62,38 +61,42 @@ public class MovieDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if(getArguments().containsKey("MOVIE")){
             mMovieItem = getArguments().getParcelable("MOVIE");
-            assert mMovieItem != null;
+            //assert mMovieItem != null;
             //Log.e(LOG_TAG,mMovieItem.getTitle());
+            Activity activity = this.getActivity();
+            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+            if (appBarLayout != null) {
+                appBarLayout.setTitle(mMovieItem.getTitle());
+            }
         }
     }
 
     private void updateReviewsAndTrailers(){
+        Log.e(LOG_TAG,"Adding trailer details");
         new FetchObjectTask("videos").execute();
+        Log.e(LOG_TAG, "Adding review details");
         new FetchObjectTask("reviews").execute();
+        Log.e(LOG_TAG, "Both reviews and trailers updated");
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //Log.e(LOG_TAG,"onCreateView");
-        Activity activity = this.getActivity();
-        CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-        if (appBarLayout != null) {
-            appBarLayout.setTitle(mMovieItem.getTitle());
-        }
+        Log.e(LOG_TAG,"onCreateView");
+
 
         rootView = inflater.inflate(R.layout.movie_detail, container, false);
-
+        Log.e(LOG_TAG,"rootview inflated.");
         if (mMovieItem != null){
             addMovieDetails(mMovieItem, rootView);
             updateReviewsAndTrailers();
         }
-
+        Log.e(LOG_TAG,"Returning final view");
         return rootView;
     }
 
     void addMovieDetails(MovieItem mMovieItem,View rootView){
-
+        Log.e(LOG_TAG,"Adding movie details");
         ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.getRelease_date().substring(0, 4));
         String rating = mMovieItem.getVote_average().toString().concat("/10");
         ((TextView) rootView.findViewById(R.id.movie_vote_average)).setText(rating);
@@ -103,6 +106,7 @@ public class MovieDetailFragment extends Fragment {
                 .into((ImageView) rootView.findViewById(R.id.movie_poster));
 
         ((TextView) rootView.findViewById(R.id.movie_overview)).setText(mMovieItem.getOverview());
+        Log.e(LOG_TAG, "Adding movie details - complete");
     }
 
     public class FetchObjectTask extends AsyncTask<String,Void,Object[]>{
@@ -163,7 +167,8 @@ public class MovieDetailFragment extends Fragment {
             LinearLayout movie_detail_layout = (LinearLayout) rootView.findViewById(R.id.main_movie_layout);
             for (Object object : objects){
                 final ReviewItem mReview = (ReviewItem) object;
-                LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                LayoutInflater inflater = LayoutInflater.from(getContext());
+                //LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View mReviewRow = inflater.inflate(R.layout.review_row, null);
 
                 mReviewRow.setOnClickListener(new View.OnClickListener() {
