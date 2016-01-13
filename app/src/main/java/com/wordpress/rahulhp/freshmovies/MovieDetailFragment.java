@@ -1,22 +1,27 @@
 package com.wordpress.rahulhp.freshmovies;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -30,6 +35,9 @@ import com.wordpress.rahulhp.freshmovies.Classes.TrailerItem;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by RahulHP on 21/12/15.
@@ -52,7 +60,11 @@ public class MovieDetailFragment extends Fragment {
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         mMovieItem = getArguments().getParcelable("MOVIE");
-
+        Activity activity = this.getActivity();
+        CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+        if (appBarLayout != null) {
+            appBarLayout.setTitle(mMovieItem.getTitle());
+        }
     }
 
     @Override
@@ -72,31 +84,65 @@ public class MovieDetailFragment extends Fragment {
     }
 
     private void updateReviewsAndTrailers(){
-        Log.e(LOG_TAG,"Adding trailer details");
         new FetchObjectTask("videos").execute();
-        Log.e(LOG_TAG, "Adding review details");
         new FetchObjectTask("reviews").execute();
-        Log.e(LOG_TAG, "Both reviews and trailers updated");
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.e(LOG_TAG,"onCreateView");
+
 
 
         rootView = inflater.inflate(R.layout.movie_detail, container, false);
-        Log.e(LOG_TAG,"rootview inflated.");
+
         if (mMovieItem != null){
             addMovieDetails(mMovieItem, rootView);
             updateReviewsAndTrailers();
         }
-        Log.e(LOG_TAG,"Returning final view");
+
+
+        Button favButton = (Button) rootView.findViewById(R.id.favButton);
+
+        favButton.setOnClickListener(new View.OnClickListener() {
+            SharedPreferences pref = getActivity().getApplicationContext().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            Set<Long> favMovies;
+            Gson gson = new Gson();
+            String snackbarString;
+            @Override
+            public void onClick(View v) {
+                String favMoviesJson = pref.getString("FAVS",null);
+
+                if (favMoviesJson != null) {
+                    Type type = new TypeToken<HashSet<Long>>(){}.getType();
+                    favMovies = gson.fromJson(favMoviesJson,type);
+                } else {
+                    favMovies = new HashSet<Long>();
+                }
+
+
+                if (favMovies.contains(mMovieItem.getId())){
+                    snackbarString="Removing movie from favourites.";
+                    favMovies.remove(mMovieItem.getId());
+                } else {
+                    snackbarString="Adding movie to favourites.";
+                    favMovies.add(mMovieItem.getId());
+                }
+
+                Snackbar.make(rootView, snackbarString, Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null).show();
+                favMoviesJson = gson.toJson(favMovies);
+                editor.putString("FAVS",favMoviesJson);
+                editor.commit();
+
+            }
+        });
         return rootView;
     }
 
     void addMovieDetails(MovieItem mMovieItem,View rootView){
-        Log.e(LOG_TAG,"Adding movie details");
+        Log.e(LOG_TAG, "Adding movie details");
         ((TextView) rootView.findViewById(R.id.movie_release_date)).setText(mMovieItem.getRelease_date().substring(0, 4));
         String rating = mMovieItem.getVote_average().toString().concat("/10");
         ((TextView) rootView.findViewById(R.id.movie_vote_average)).setText(rating);
@@ -106,7 +152,8 @@ public class MovieDetailFragment extends Fragment {
                 .into((ImageView) rootView.findViewById(R.id.movie_poster));
 
         ((TextView) rootView.findViewById(R.id.movie_overview)).setText(mMovieItem.getOverview());
-        Log.e(LOG_TAG, "Adding movie details - complete");
+
+
     }
 
     public class FetchObjectTask extends AsyncTask<String,Void,Object[]>{
@@ -165,6 +212,12 @@ public class MovieDetailFragment extends Fragment {
 
         void createReviewView(Object[] objects){
             LinearLayout movie_detail_layout = (LinearLayout) rootView.findViewById(R.id.main_movie_layout);
+
+            View headerView = LayoutInflater.from(getActivity()).inflate(R.layout.movie_detail_header, null);
+            TextView headerText = (TextView) headerView.findViewById(R.id.header);
+            headerText.setText("Reviews");
+            movie_detail_layout.addView(headerView);
+
             for (Object object : objects){
                 final ReviewItem mReview = (ReviewItem) object;
                 LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -194,6 +247,13 @@ public class MovieDetailFragment extends Fragment {
 
         void createTrailerView(Object[] objects){
             LinearLayout movie_detail_layout = (LinearLayout) rootView.findViewById(R.id.main_movie_layout);
+
+            View headerView = LayoutInflater.from(getActivity()).inflate(R.layout.movie_detail_header, null);
+            TextView headerText = (TextView) headerView.findViewById(R.id.header);
+            headerText.setText("Trailers");
+            movie_detail_layout.addView(headerView);
+
+
             for (Object object : objects){
                 final TrailerItem mTrailer = (TrailerItem) object;
                 View mTrailerRow = LayoutInflater.from(getActivity()).inflate(R.layout.trailer_row, null);
